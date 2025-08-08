@@ -1,0 +1,14 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "es2016",
+    "module": "NodeNext",
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["es2016", "dom"],
+    "outDir": "dist"
+  }
+}

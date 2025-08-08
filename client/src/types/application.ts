@@ -1,0 +1,28 @@
+export type Application = {
+  id?: string;
+  client_id: string;
+  name: string;
+  client_id_value: string;
+  client_secret: string | null;
+  redirect_uris: string | null;
+  post_logout_redirect_uris: string | null;
+  grant_types: string | null;
+  scopes: string | null;
+  is_confidential: boolean;
+  require_pkce: boolean;
+  access_token_lifetime: number;
+  refresh_token_lifetime: number;
+  allowed_identity_providers: string | null;
+  allowed_cors_origins: string | null;
+  terms_url: string | null;
+  privacy_url: string | null;
+  type: string | null;
+  auth_method: string | null;
+  logo_url: string | null;
+  description: string | null;
+  login_url: string | null;
+  logout_url: string | null;
+  is_active: boolean;
+  created_at?: Date;
+  updated_at?: Date;
+};

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Real-Time 3D Collaboration</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Three.js UMD -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.150.1/build/three.min.js"></script>
+    <!-- OrbitControls UMD (global scope compatible) -->
+    <script src="https://cdn.jsdelivr.net/gh/mrdoob/three.js@r150/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 5;
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // const controls = new OrbitControls(camera, renderer.domElement);
+
+      const light = new THREE.PointLight(0xffffff, 1);
+      light.position.set(10, 10, 10);
+      scene.add(light);
+
+      const myCube = new THREE.Mesh(
+        new THREE.BoxGeometry(1, 1, 1),
+        new THREE.MeshStandardMaterial({ color: 0x0077ff })
+      );
+      scene.add(myCube);
+
+      const userCubes = {};
+      const myId = String(Date.now());
+
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      const socket = new WebSocket("ws://localhost:3001");
+
+      socket.addEventListener("message", function (event) {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "move" && msg.id !== myId) {
+          if (!userCubes[msg.id]) {
+            const cube = new THREE.Mesh(
+              new THREE.BoxGeometry(1, 1, 1),
+              new THREE.MeshStandardMaterial({ color: 0xff0000 })
+            );
+            scene.add(cube);
+            userCubes[msg.id] = cube;
+          }
+          userCubes[msg.id].position.set(msg.pos.x, msg.pos.y, msg.pos.z);
+        }
+      });
+
+      window.addEventListener("mousemove", function (e) {
+        myCube.position.x = (e.clientX / window.innerWidth) * 10 - 5;
+        myCube.position.y = -(e.clientY / window.innerHeight) * 10 + 5;
+
+        socket.send(
+          JSON.stringify({
+            type: "move",
+            id: myId,
+            pos: {
+              x: myCube.position.x,
+              y: myCube.position.y,
+              z: myCube.position.z,
+            },
+          })
+        );
+      });
+
+      window.addEventListener("resize", function () {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    </script>
+  </body>
+</html>

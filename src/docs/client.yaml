@@ -1,0 +1,234 @@
+paths:
+  /clients:
+    get:
+      summary: List clients
+      tags: [Clients]
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of clients to return (pagination)
+        - in: query
+          name: offset
+          schema:
+            type: integer
+          description: Number of clients to skip (pagination)
+        - in: query
+          name: all
+          schema:
+            type: boolean
+          description: Return all clients (ignores pagination)
+      responses:
+        "200":
+          description: List of clients with pagination metadata
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Client"
+                  total:
+                    type: integer
+                    example: 4
+                  limit:
+                    type: integer
+                    example: 10
+                  offset:
+                    type: integer
+                    example: 0
+                  hasNextPage:
+                    type: boolean
+                    example: false
+                  hasPreviousPage:
+                    type: boolean
+                    example: false
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      summary: Create a new client
+      tags: [Clients]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Client_Input"
+            example:
+              name: "Helix Admin Panel"
+              description: "Admin dashboard for identity server"
+              support_email: "support@helix.com"
+      responses:
+        "201":
+          description: Client created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /clients/{id}:
+    get:
+      summary: Get a client by ID
+      tags: [Clients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: scope
+          schema:
+            type: string
+          description: Optional scope to include additional relations
+      responses:
+        "200":
+          description: Client found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "400":
+          description: Missing or invalid client ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    patch:
+      summary: Update a client by ID
+      tags: [Clients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Client_Input"
+      responses:
+        "200":
+          description: Client updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Client"
+        "400":
+          description: Body data syntax error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Body data error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: Delete a client by ID
+      tags: [Clients]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Client successfully deleted
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  responses:
+    NotFound:
+      description: Client not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    InternalServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+  schemas:
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        logo_url:
+          type: string
+        theme_color:
+          type: string
+        support_email:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Client_Input:
+      type: object
+      required:
+        - name
+        - support_email
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        logo_url:
+          type: string
+        theme_color:
+          type: string
+        support_email:
+          type: string
